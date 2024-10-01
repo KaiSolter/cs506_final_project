@@ -1,4 +1,6 @@
-Proposal
+Project Proposal:
+
+
 Goal: 
 Predict the outcome of a chess game between two players who have never played against each other based on their performance in other games. The players' “elo” rank must be within 200 of each other, to avoid large rating gaps which make the outcome of the game obvious. In addition, we will be focused on the “blitz” time control. In order to predict who will win the game, we will use data from some of the following factors: 
 Previous games and their respective outcomes
