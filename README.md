@@ -40,5 +40,7 @@ In general, we will take two users within the specified ELO range who have playe
 
 Modeling:
 We are still making up our minds between these two modeling approaches and would appreciate feedback on which you think better supports our goals:
+
 XGBoost: An advanced gradient-boosting method that often performs better than random forests in structured data scenarios like this. It can capture complex interactions between features.
+
 Neural Networks (Deep Learning): consists of interconnected layers of nodes , where each node processes inputs using weights and biases, and applies an activation function to produce an output. These networks learn patterns from data through a process called backpropagation, adjusting weights to minimize error in predictions. Neural networks are widely used in tasks like image recognition, natural language processing, and other complex problem-solving areas due to their ability to model non-linear relationships in data.
