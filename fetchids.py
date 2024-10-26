@@ -5,12 +5,13 @@ import time
 import random
 
 API_BASE_URL = "https://lichess.org/api/games/user/"
-user_ids = set() #collected user ids 
-used_ids = set() #user ids used for collection
-STARTING_USER = "wcarmona"
+total_ids = set() #total dataframe of every user id collected
+STARTING_USERS = ["winx_m", "GK1963", "hungzhao", "Iwantogotoswizerland", "Gatotkoco995", "sergiosf97", "khairinasi",
+                  "TrentAllgood", "kitikita123", "wcarmona", "Josue_Daza", "Gennadiy300iq", "mzauber", "DruzhkovVN", 
+                  "Sys87", "pichibart"]
 num_ids = 100
 headers = {"Accept": "application/x-ndjson"} 
-user_ids.add(STARTING_USER)
+
 
 def getnops(n, username): 
     startinglen = len(user_ids)
@@ -54,16 +55,33 @@ def getnops(n, username):
                 break
 
 
-for i in range(1, 100): 
-    while(True):
-        searchUser = random.choice(list(user_ids))
-        if(searchUser not in used_ids):
-            break
-    print("Fetching games for:", searchUser)
-    getnops(15, searchUser)
-    print("Fetched games for:", searchUser)
-    used_ids.add(searchUser)
+for user in STARTING_USERS:
+    current_user_ids = set() #collected user ids 
+    used_ids = set() #user ids used for collection
+    current_user_ids.add(user)
+    for i in range(1, 1000): 
+        while(True):
+            searchUser = random.choice(list(current_user_ids))
+            if(searchUser not in used_ids):
+                break
+        print("Fetching games for:", searchUser)
+        getnops(15, searchUser)
+        print("Fetched games for:", searchUser)
+        used_ids.add(searchUser)
+    total_ids.update(current_user_ids)
+df = pd.DataFrame(total_ids, columns=['User ID'])
 
-df = pd.DataFrame(user_ids, columns=['User ID'])
+
+# for i in range(1, 1000): 
+#     while(True):
+#         searchUser = random.choice(list(user_ids))
+#         if(searchUser not in used_ids):
+#             break
+#     print("Fetching games for:", searchUser)
+#     getnops(15, searchUser)
+#     print("Fetched games for:", searchUser)
+#     used_ids.add(searchUser)
+
+
 
 print(df)
