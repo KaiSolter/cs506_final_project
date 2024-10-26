@@ -6,14 +6,14 @@ import random
 
 API_BASE_URL = "https://lichess.org/api/games/user/"
 total_ids = set() #total dataframe of every user id collected
-STARTING_USERS = ["winx_m", "GK1963", "hungzhao", "Iwantogotoswizerland", "Gatotkoco995", "sergiosf97", "khairinasi",
+STARTING_USERS = ["winx_m", "GK1963", "hungzhao", "Iwantogotoswizerland", "Gatotkoco995", "sergiosf97", "khairinasir",
                   "TrentAllgood", "kitikita123", "wcarmona", "Josue_Daza", "Gennadiy300iq", "mzauber", "DruzhkovVN", 
                   "Sys87", "pichibart"]
 num_ids = 100
 headers = {"Accept": "application/x-ndjson"} 
 
 
-def getnops(n, username): 
+def getnops(n, username, user_ids): 
     startinglen = len(user_ids)
     url = API_BASE_URL + username
     try:
@@ -59,17 +59,17 @@ for user in STARTING_USERS:
     current_user_ids = set() #collected user ids 
     used_ids = set() #user ids used for collection
     current_user_ids.add(user)
-    for i in range(1, 1000): 
+    for i in range(1, 2): 
         while(True):
             searchUser = random.choice(list(current_user_ids))
             if(searchUser not in used_ids):
                 break
         print("Fetching games for:", searchUser)
-        getnops(15, searchUser)
+        getnops(15, searchUser, current_user_ids)
         print("Fetched games for:", searchUser)
         used_ids.add(searchUser)
     total_ids.update(current_user_ids)
-df = pd.DataFrame(total_ids, columns=['User ID'])
+df = pd.DataFrame({'user_id': list(total_ids)})
 
 
 # for i in range(1, 1000): 
@@ -81,6 +81,46 @@ df = pd.DataFrame(total_ids, columns=['User ID'])
 #     getnops(15, searchUser)
 #     print("Fetched games for:", searchUser)
 #     used_ids.add(searchUser)
+
+rating_list = []
+
+def fetch_user_rating(user_id):
+    url = f"https://lichess.org/api/user/{user_id}"
+    headers = {
+        'Accept': 'application/json',
+        # 'Authorization': 'Bearer YOUR_API_TOKEN'  # Optional: Include if you have an API token
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+
+        
+
+        blitz = data.get('perfs', {}).get('blitz', {})
+        rating = blitz.get('rating', None)
+        
+        return rating
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error for {user_id}: {http_err}")
+
+for user in list(total_ids):
+    rating =fetch_user_rating(user)
+    print("rating for",user, "is",rating)
+    rating_list.append(rating)
+    time.sleep(1)
+
+
+df['blitz_rating'] = rating_list
+df.to_csv('lichess_user_ratings.csv', index=False)
+
+
+print("printing df here")
+print(df)
+print(df.shape)
+
+
 
 
 
