@@ -19,7 +19,7 @@ def getnops(n, username, user_ids):
     try:
         response = requests.get(url, headers=headers, params={"max": n}, stream=True, timeout=10)  # Increase timeout to 10 seconds
         if response.status_code == 429:
-            retry_after = response.headers.get("Retry-After", 5)
+            retry_after = response.headers.get("Retry-After", 4)
             print(f"Rate limited. Waiting {retry_after} seconds...")
             time.sleep(int(retry_after))
             return
@@ -59,28 +59,18 @@ for user in STARTING_USERS:
     current_user_ids = set() #collected user ids 
     used_ids = set() #user ids used for collection
     current_user_ids.add(user)
-    for i in range(1, 2): 
-        while(True):
-            searchUser = random.choice(list(current_user_ids))
-            if(searchUser not in used_ids):
-                break
+    for i in range(1, 150): 
+        available_ids = list(current_user_ids - used_ids)
+        if(available_ids):
+            searchUser = random.choice(available_ids)
+        else: 
+            continue
         print("Fetching games for:", searchUser)
         getnops(15, searchUser, current_user_ids)
         print("Fetched games for:", searchUser)
         used_ids.add(searchUser)
     total_ids.update(current_user_ids)
 df = pd.DataFrame({'user_id': list(total_ids)})
-
-
-# for i in range(1, 1000): 
-#     while(True):
-#         searchUser = random.choice(list(user_ids))
-#         if(searchUser not in used_ids):
-#             break
-#     print("Fetching games for:", searchUser)
-#     getnops(15, searchUser)
-#     print("Fetched games for:", searchUser)
-#     used_ids.add(searchUser)
 
 rating_list = []
 
@@ -92,12 +82,13 @@ def fetch_user_rating(user_id):
     }
     try:
         response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 429:
+            print(f"Rate limited. Waiting {4} seconds...")
+            time.sleep(4)
+            return
         response.raise_for_status()
         data = response.json()
         
-
-        
-
         blitz = data.get('perfs', {}).get('blitz', {})
         rating = blitz.get('rating', None)
         
@@ -109,7 +100,6 @@ for user in list(total_ids):
     rating =fetch_user_rating(user)
     print("rating for",user, "is",rating)
     rating_list.append(rating)
-    time.sleep(1)
 
 
 df['blitz_rating'] = rating_list
@@ -119,9 +109,3 @@ df.to_csv('lichess_user_ratings.csv', index=False)
 print("printing df here")
 print(df)
 print(df.shape)
-
-
-
-
-
-print(df)
