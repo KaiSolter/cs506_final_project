@@ -4,17 +4,104 @@ import pandas as pd
 
 df = pd.read_csv('normalized1.csv')
 
+#----------------------------------------------------------------------------------#
 #fetch blitz games only
 
+def fetch_blitz_games(username, max_blitz_games=100, max_total_games=300):
+    url = f"https://lichess.org/api/games/user/{username}"
+    headers = {
+        "Accept": "application/x-ndjson",
+        "User-Agent": "BlitzGameFetcher/1.0"
+    }
+    win_count = 0
+    draw_count = 0
+    loss_count = 0
+    blitz_game_count = 0
+    total_games_checked = 0
+    batch_size = 100
+    timeout = 10  # Set a timeout of 10 seconds
 
-#rate limit logic, save current progress
+    while blitz_game_count < max_blitz_games and total_games_checked < max_total_games:
+        params = {
+            "max": batch_size,
+            "opening": False,
+            "clocks": False,
+            "evals": False,
+            "pgnInJson": True
+        }
+
+        try:
+            response = requests.get(url, params=params, headers=headers, stream=True, timeout=timeout)
+            if response.status_code == 429:
+                print("Rate limit hit. Stopping fetch to avoid further requests.")
+                return {
+                    "status": "rate_limited",
+                    "win_count": win_count,
+                    "loss_count": loss_count,
+                    "draw_count": draw_count,
+                    "blitz_game_count": blitz_game_count,
+                    "total_games_checked": total_games_checked
+                }
+
+            elif response.status_code != 200:
+                print(f"Failed to retrieve data for {username}. Status code: {response.status_code}")
+                return {"status": "failed"}
+
+            games_in_batch = 0
+            for line in response.iter_lines():
+                if line:
+                    game_data = json.loads(line.decode("utf-8"))
+                    total_games_checked += 1
+                    games_in_batch += 1
+
+                    if game_data.get("speed") == "blitz":
+                        blitz_game_count += 1
+                        if "winner" in game_data:
+                            if (game_data["players"]["white"].get("user", {}).get("name", "").lower() == username.lower() and game_data["winner"] == "white") or \
+                               (game_data["players"]["black"].get("user", {}).get("name", "").lower() == username.lower() and game_data["winner"] == "black"):
+                                win_count += 1
+                            else:
+                                loss_count += 1
+                        else:
+                            draw_count += 1
+
+                    if blitz_game_count >= max_blitz_games or total_games_checked >= max_total_games:
+                        break
+
+            # If the batch contains fewer games than requested, we likely reached the end of available games.
+            if games_in_batch < batch_size:
+                print(f"Reached end of available games for {username}. Total games checked: {total_games_checked}")
+                break
+
+        except requests.exceptions.ConnectTimeout:
+            print(f"Timeout error for user {username}. Retrying...")
+            continue
+
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred for user {username}: {e}")
+            return {"status": "failed"}
+
+    return {
+        "status": "success",
+        "win_count": win_count,
+        "loss_count": loss_count,
+        "draw_count": draw_count,
+        "blitz_game_count": blitz_game_count,
+        "total_games_checked": total_games_checked
+    }
+
+    
+#------------------------------------------------------------------------------------#
+#rate limit logic
+
+#save current progress
 def save_progress(df):
     """Saves the DataFrame to progress.csv."""
     df.to_csv('progress.csv', index=False)
     print("Progress saved to progress.csv")
 
-#rate limit logic, continue from last user id
-def load_progress(df):
+#continue from last user id
+def load_progress():
     """Loads progress from progress.csv and identifies the last user processed."""
     try:
         progress_df = pd.read_csv('progress.csv')
@@ -23,115 +110,91 @@ def load_progress(df):
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return df, None
+        return pd.read_csv('normalized1.csv'), None
+    
+    
+#--------------------------------------------------------------------------------------------#
+#calculating the winrate of what is being passed in
 
 def get_win_rate(username):
-    # API endpoint to fetch up to 100 recent games
-    url = f"https://lichess.org/api/games/user/{username}"
-    params = {
-        "max": 100,
-        "opening": False,
-        "clocks": False,
-        "evals": False,
-        "pgnInJson": True,  # Enable JSON format for easier parsing
-    }
-    
-    # Request headers to avoid rate limiting
-    headers = {
-        "Accept": "application/x-ndjson",
-        "User-Agent": "WinRateCalculator/1.0"  # Custom user-agent for identification
-    }
-
-    response = requests.get(url, params=params, headers=headers, stream=True)
-    if response.status_code == 429:  # Rate limit hit
-        print("Rate limit hit. Stopping process and saving progress.")
+    result = fetch_blitz_games(username)
+    if result["status"] == "rate_limited":
+        print("Rate limit encountered. Implement custom rate limit handling logic here.")
         return "rate_limited", None, None, None, 0
-    if response.status_code != 200:
-        print("Failed to fetch data. Ensure the username is correct.")
-        return None, None, None, None, 0
+    elif result["status"] == "failed":
+        return "failed", None, None, None, 0
 
-    win_count = 0
-    draw_count = 0
-    loss_count = 0
-    game_count = 0
+    blitz_game_count = result["blitz_game_count"]
+    if blitz_game_count == 0:
+        print("No Blitz games found for this user.")
+        return "no_games", 0, 0, 0, 0  # Return integer zeroes if no games
 
-    # Parse the NDJSON response line by line
-    for line in response.iter_lines():
-        if line:
-            game = line.decode("utf-8")
-            game_data = json.loads(game)  
-            
-            # Determine if the user won, lost, or drew
-            if "winner" in game_data:
-                # Check if the user is the white player and won
-                if ("user" in game_data["players"]["white"] and
-                    game_data["players"]["white"]["user"]["name"].lower() == username.lower()):
-                    if game_data["winner"] == "white":
-                        win_count += 1
-                    else:
-                        loss_count += 1
-                # Check if the user is the black player and won
-                elif ("user" in game_data["players"]["black"] and
-                      game_data["players"]["black"]["user"]["name"].lower() == username.lower()):
-                    if game_data["winner"] == "black":
-                        win_count += 1
-                    else:
-                        loss_count += 1
-                else:
-                    # Game is a loss if user is not found as winner
-                    loss_count += 1
-            else:
-                draw_count += 1  # No winner field means it was a draw
+    # Calculate win, loss, and draw rates as integer percentages
+    win_rate = int((result["win_count"] / blitz_game_count) * 100)
+    lose_rate = int((result["loss_count"] / blitz_game_count) * 100)
+    draw_rate = int((result["draw_count"] / blitz_game_count) * 100)
 
-            game_count += 1
+    print(f"Blitz Win Rate for {username}: {win_rate}%")
+    print(f"Blitz Lose Rate for {username}: {lose_rate}%")
+    print(f"Blitz Draw Rate for {username}: {draw_rate}%")
+    print(f"Total Blitz Games: {blitz_game_count} out of {result['total_games_checked']} games checked")
 
-    # Calculate win rate
-    if game_count == 0:
-        print("No games found for this user.")
-        return 0.0, 0.0, 0.0, 0
-
-    win_rate = (win_count / game_count) * 100
-    lose_rate = (loss_count / game_count) * 100
-    draw_rate = (draw_count / game_count) * 100
-    print(f"Win Rate for {username}: {win_rate:.2f}%")
-    print(f"Lose Rate for {username}: {lose_rate:.2f}%") 
-    print(f"Draw Rate for {username}: {draw_rate:.2f}%")
-    print(f"Wins: {win_count}, Draws: {draw_count}, Losses: {loss_count}, Total Games: {game_count}")
-    return "success", win_rate, lose_rate, draw_rate, game_count
+    return "success", win_rate, lose_rate, draw_rate, blitz_game_count
 
 
 # Example usage
 # get_win_rate("Lose2U")
 
+#--------------------------------------------------------------------------------------------------------#
+#add winrate of user
+
 def add_user_stats(df):
-    df, last_user_processed = load_progress(df)
+
     start_index = 0
+    df, last_user_processed = load_progress()
     if last_user_processed:
         start_index = df[df['user_id'] == last_user_processed].index[0] + 1
         
     # Create empty columns for the stats
     for col in ['win_rate', 'lose_rate', 'draw_rate', 'game_count']:
         if col not in df.columns:
-            df['win_rate'] = 0.0
-            df['lose_rate'] = 0.0
-            df['draw_rate'] = 0.0
-            df['game_count'] = 0
+            df[col] = 0.0
 
-    for index, row in df.iloc[start_index:].iterrows():
-        status, win_rate, lose_rate, draw_rate, game_count = get_win_rate(row['user_id'])
-        
+    while start_index < len(df):
+        row = df.iloc[start_index]
+        user_id = row['user_id']
+        status, win_rate, lose_rate, draw_rate, game_count = get_win_rate(user_id)
+
         if status == "rate_limited":
-            # Save progress and stop if rate limit is hit
+            # Save progress and restart the loop to retry
             save_progress(df)
-            break
-        elif win_rate is not None:  # Update the row with fetched data if successful
-            df.at[index, 'win_rate'] = win_rate
-            df.at[index, 'lose_rate'] = lose_rate
-            df.at[index, 'draw_rate'] = draw_rate
-            df.at[index, 'game_count'] = game_count
+            print("Rate limit encountered. Retrying...")
+            continue
+        elif status == "failed":
+            print(f"Failed to retrieve data for {user_id}. Moving to next user.")
+            start_index += 1
+            continue
+        elif status == "no_games":
+            print(f"No Blitz games for {user_id}. Moving to next user.")
+        else:
+            # Update stats if successful
+            df.at[start_index, 'win_rate'] = win_rate
+            df.at[start_index, 'lose_rate'] = lose_rate
+            df.at[start_index, 'draw_rate'] = draw_rate
+            df.at[start_index, 'game_count'] = game_count
 
+        # Save progress after each user and move to the next
+        save_progress(df)
+        start_index += 1
+
+    # Final save to ensure all progress is written
+    df.to_csv('final_stats.csv', index=False)
+    print("All users processed and final stats saved to final_stats.csv")
+    
     return df
 
-
+# Assuming get_win_rate and fetch_blitz_games functions are defined as in previous instructions
+df, _ = load_progress()
 df = add_user_stats(df)
-df.to_csv('stats.csv', index = False)
+df.to_csv('stats.csv', index=False)
+
