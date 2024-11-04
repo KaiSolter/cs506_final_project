@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 
 def get_total_games_played(username):
     """
@@ -16,9 +17,9 @@ def get_total_games_played(username):
         response = requests.get(url)
         if response.status_code == 200:
             user_data = response.json()
-            total_games = user_data.get('count', {}).get('all', 0)
-            print(f"Total games played by {username}: {total_games}")
-            return total_games
+            blitz_games = user_data.get('perfs', {}).get('blitz', {}).get('games', 0)
+            print(f"Blitz games played by {username}: {blitz_games}")
+            return blitz_games
         else:
             print(f"Failed to retrieve data for {username}. Status code: {response.status_code}")
             return -1
@@ -26,6 +27,14 @@ def get_total_games_played(username):
         print(f"An error occurred: {e}")
         return -1
 
-# Example usage
-# total_games = get_total_games_played("exampleUser")
-# print(total_games)
+def get_blitz_games(df): 
+    total_blitz = []
+    for user in df['user_id']:
+        blitz_games = get_total_games_played(user)
+        total_blitz.append(blitz_games)
+    df['total_games_played'] = total_blitz
+    return df
+
+df = pd.read_csv('normalized1.csv')
+new_df = get_blitz_games(df)
+df.to_csv('with_total_games.csv')
