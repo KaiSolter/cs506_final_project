@@ -2,6 +2,13 @@ import requests
 import pandas as pd
 import json
 import time
+import os
+
+if os.path.exists("progress_op.csv"):
+    os.remove("progress_op.csv")
+    print("progress_op.csv deleted.")
+else:
+    print("No existing progress_op.csv found.")
 
 df = pd.read_csv('deviation_stats.csv')
 
@@ -26,11 +33,12 @@ def load_progress():
 headers = {"Accept": "application/x-ndjson"} 
 
 def get_recent_op(username): 
-    url = f"https://lichess.org/api/games/user/{username}?perfType=blitz"
+    url = f"https://lichess.org/api/games/user/{username}"
     try:
         print('request for:', username,)
         response = requests.get(url, headers=headers, params={"max": 1}, stream=True)
         if response.status_code == 429:
+            time.sleep(60)
             return "rate_limited", None, None
         elif response.status_code != 200:
             print(f"Failed to retrieve data for {username}. Status code: {response.status_code}")
@@ -100,6 +108,7 @@ def add_user_stats(df):
         user_id = row['user_id']
         print(user_id)
         status, op, score = get_recent_op(user_id)
+        time.sleep(3)
 
         if status == "rate_limited":
             # Save progress and restart the loop to retry
