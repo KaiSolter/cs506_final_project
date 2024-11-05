@@ -45,7 +45,6 @@ def get_recent_op(username):
                     continue  
                 # Add the usernames of white and black players
                 if "players" in game_data:
-                    print(game_data)
                     white_player = game_data["players"].get("white", {}).get("user", {}).get("name")
                     black_player = game_data["players"].get("black", {}).get("user", {}).get("name")
                     if "winner" in game_data:
