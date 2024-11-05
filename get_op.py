@@ -26,16 +26,16 @@ def load_progress():
 headers = {"Accept": "application/x-ndjson"} 
 
 def get_recent_op(username): 
-    url = "https://lichess.org/api/games/user/" + username
+    url = f"https://lichess.org/api/games/user/{username}?perfType=blitz"
     try:
-        response = requests.get(url)
+        print('request for:', username,)
+        response = requests.get(url, headers=headers, params={"max": 1}, stream=True)
         if response.status_code == 429:
             return "rate_limited", None, None
         elif response.status_code != 200:
             print(f"Failed to retrieve data for {username}. Status code: {response.status_code}")
             return "failed", None, None
         
-
         for line in response.iter_lines():
             if line:
                 try:
@@ -45,25 +45,32 @@ def get_recent_op(username):
                     continue  
                 # Add the usernames of white and black players
                 if "players" in game_data:
+                    print(game_data)
                     white_player = game_data["players"].get("white", {}).get("user", {}).get("name")
                     black_player = game_data["players"].get("black", {}).get("user", {}).get("name")
-
-                    if white_player == username: 
-                        op = black_player
-                        if game_data["winner"] == "white":
-                            score = 1
-                        elif game_data["winner"] == "black":
-                            score = -1
-                        else:
-                            score = 0
-                    elif black_player == username:
-                        op = white_player
-                        if game_data["winner"] == "white":
-                            score = -1
-                        elif game_data["winner"] == "black":
-                            score = 1
-                        else:
-                            score = 0
+                    if "winner" in game_data:
+                        if white_player == username: 
+                            op = black_player
+                            if game_data["winner"] == "white":
+                                score = 1
+                            elif game_data["winner"] == "black":
+                                score = -1
+                        elif black_player == username:
+                            op = white_player
+                            if game_data["winner"] == "white":
+                                score = -1
+                            elif game_data["winner"] == "black":
+                                score = 1
+                    else: 
+                        score = 0
+                        if white_player == username: 
+                            op = black_player
+                        elif black_player == username:
+                            op = white_player
+                            
+                print('white player:', white_player)
+                print('black player:', black_player)
+                print("success", op, score)
                 return "success", op, score
     except requests.exceptions.RequestException as e:
         print(f"An error occurred for user {username}: {e}")
