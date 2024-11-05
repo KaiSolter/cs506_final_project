@@ -1,4 +1,4 @@
-user_id,win_rate,lose_rate,draw_rate,game_count
+user_id,black_win_rate,black_lose_rate,black_draw_rate,black_game_count
 engsultan00,52.083333333333336,47.91666666666667,0.0,48.0
 Panfi,40.38461538461539,55.769230769230774,3.8461538461538463,52.0
 rsk86,37.5,58.333333333333336,4.166666666666666,48.0
