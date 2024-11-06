@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score
 
-data = pd.read_csv('final_data_combined.csv')
+data = pd.read_csv('data.csv')
 
-#our features
-X = data.iloc[:, :-1]  # all columns except the last one
+# our features
+X = data.drop(columns=['game_result', 'user_id', 'user_op'])
+
 #our label
 y = data.iloc[:, -1]   # the last column
 
@@ -15,16 +16,16 @@ y = data.iloc[:, -1]   # the last column
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
 
 # Initialize the KNN model
-knn = KNeighborsClassifier()
+rf = RandomForestClassifier(random_state=42)
 
 # Set up hyperparameter grid for tuning
 param_grid = {
-    'n_neighbors': [3, 5],          # Two choices for number of neighbors
-    'weights': ['uniform', 'distance']  # Two choices for weighting
+    'n_estimators': [50, 100],  # Number of trees in the forest
+    'max_depth': [10, 20]       # Maximum depth of the trees
 }
 
 # Perform grid search with cross-validation
-grid_search = GridSearchCV(knn, param_grid, cv=5, scoring='accuracy')
+grid_search = GridSearchCV(rf, param_grid, cv=5, scoring='accuracy')
 grid_search.fit(X_train, y_train)
 
 # Get the best model
