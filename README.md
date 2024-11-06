@@ -46,7 +46,9 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 
 3. **Preliminary Analysis and Feature Engineering**
 
-**SEE IPYNB FOR GRAPHS/VISUALIZATION OF DATA
+**SEE IPYNB FOR GRAPHS/VISUALIZATION OF DATA 
+
+
 **Data Preparation**
 
 The first step in our preprocessing is to remove or convert non categorical variables into numerical ones. As of right now that simply involves dropping the names of the users, although we may later experiment with one-hot encoding.  
