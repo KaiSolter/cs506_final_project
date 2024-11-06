@@ -46,42 +46,14 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 
 3. **Preliminary Analysis and Feature Engineering**
 
-	  
-To begin with, we got a rating distribution of our users and opponents as shown below:  
-This can be compared to the actually rating distribution of active blitz users on lichess:
-
-         ![][image1]
-
-Distribution of blitz rating for users and opponents (2 graphs):   
-![][image2]  
-![][image3]
-
-Distribution of rating deviation for users and opponents (2 graphs): 
-
-![][image4]  
-![][image5]
-
-Distribution of Win rates for users and opponents:
-
-![][image6]
-
-Distribution of White user win rates and Black opponent win rates to represent   
-distribution of overall win rates:
-
-**![][image7]**
-
-Distribution of draw rates when user is White and opponent is Black:
-
-![][image8]
-
+**SEE IPYNB FOR GRAPHS/VISUALIZATION OF DATA
 **Data Preparation**
 
 The first step in our preprocessing is to remove or convert non categorical variables into numerical ones. As of right now that simply involves dropping the names of the users, although we may later experiment with one-hot encoding.  
 Next we removed irrelevant users based on our preliminary analysis. We decided to remove users that had played less than a total of 10 games, in order to ensure that the features were relevant to the user.  Additionally, we removed users with zero games as white, or zero games as black. If one of the scripts we made that uses the API to fetch data fails, it will zero out only the color specific features. However, there is a different script that fetched the total games of the user, and therefore we needed to make sure that both API calls were successful to ensure the accuracy of our dataset. There could theoretically be a user with a total game count above 10, but zeroed out color specific features, and this methodology prevents that user from skewing the predictions. Finally we also removed users which had NaN in any feature as they simply represent an error with the api.
 
-**Correlation Matrix on selected features:**  
-**![][image9]**
 
+**SEE IPYNB FOR CORRELATION MATRIX
 	
 
 We decided to drop irrelevant features, and the features that we were left with are:
