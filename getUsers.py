@@ -24,6 +24,7 @@ def save_progress(df):
 headers = {"Accept": "application/x-ndjson"} 
 
 def getnops(n, username, user_ids): 
+    global count
     startinglen = len(user_ids)
     url = "https://lichess.org/api/games/user/" + username
     try:
