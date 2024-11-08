@@ -34,11 +34,14 @@ def getnops(n, username, user_ids):
         print('Requesting data for:', username)
         response = requests.get(url, headers=headers, params={"max": n}, stream=True, timeout=10)  # Increase timeout to 10 seconds
         if response.status_code == 429:
+            if count < 11:
+                count = count + .3
             print(f"Rate limited. Waiting {30 + 2**count} seconds...")
             time.sleep(30 + 2**count) 
             return
         elif response.status_code != 200:
-            count = count + .5
+            if count < 11:
+                count = count + .3
             save_progress(total_ids, current_user_ids )
             print(f"Error while fetching data for user {username}: {response.status_code} saving progress")
             return
@@ -73,9 +76,9 @@ def getnops(n, username, user_ids):
                 break
 
 STARTING_USERS = ["winx_m", "GK1963", "hungzhao", "Iwantogotoswizerland", "Gatotkoco995", "sergiosf97", "khairinasir",
-                  "TrentAllgood", "kitikita123", "wcarmona", "Josue_Daza", "Gennadiy300iq", "mzauber", "DruzhkovVN", 
+                  "TrentAllgood" ] 
+SECONDARY_USERS = ["kitikita123", "wcarmona", "Josue_Daza", "Gennadiy300iq", "mzauber", "DruzhkovVN", 
                   "Sys87", "pichibart"]
-
 for user in STARTING_USERS:
     current_user_ids = set() #collected user ids 
     used_ids = set() #user ids used for collection
@@ -87,10 +90,11 @@ for user in STARTING_USERS:
         else: 
             continue
         print("Fetching games for:", searchUser)
-        getnops(15, searchUser, current_user_ids)
-        time.sleep(1)
+        getnops(150, searchUser, current_user_ids)
+        time.sleep(0.5)
         print("Fetched games for:", searchUser)
         used_ids.add(searchUser)
+    save_progress(total_ids, current_user_ids )
     total_ids.update(current_user_ids)
 
 df = pd.DataFrame({'user_id': list(total_ids)})
