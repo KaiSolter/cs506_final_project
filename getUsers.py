@@ -30,10 +30,11 @@ def getnops(n, username, user_ids):
         print('Requesting data for:', username)
         response = requests.get(url, headers=headers, params={"max": n}, stream=True, timeout=10)  # Increase timeout to 10 seconds
         if response.status_code == 429:
-            print(f"Rate limited. Waiting {90} seconds...")
+            print(f"Rate limited. Waiting {30 + 2**count} seconds...")
             time.sleep(30 + 2**count) 
             return
         elif response.status_code != 200:
+            count = count + .5
             save_progress(pd.DataFrame({'user_id': list(total_ids)}))
             print(f"Error while fetching data for user {username}: {response.status_code} saving progress")
             return
@@ -76,7 +77,6 @@ for user in STARTING_USERS:
     used_ids = set() #user ids used for collection
     current_user_ids.add(user)
     for i in range(1, 1200):
-        count = count + .01
         available_ids = list(current_user_ids - used_ids)
         if(available_ids):
             searchUser = random.choice(available_ids)
