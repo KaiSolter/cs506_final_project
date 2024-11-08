@@ -16,8 +16,10 @@ else:
 
 df = pd.read_csv('deviation_stats_2nd.csv')
 
-def save_progress(df):
+def save_progress(total_ids, current_ids):
     """Saves the DataFrame to progress_0.csv."""
+    total_ids.update(current_ids)
+    df = pd.DataFrame({'user_id': list(total_ids)})
     df.to_csv('progress_0.csv', index=False)
     print("Progress saved to progress_0.csv")
 
@@ -25,6 +27,7 @@ headers = {"Accept": "application/x-ndjson"}
 
 def getnops(n, username, user_ids): 
     global count
+    global total_ids
     startinglen = len(user_ids)
     url = "https://lichess.org/api/games/user/" + username
     try:
@@ -36,15 +39,15 @@ def getnops(n, username, user_ids):
             return
         elif response.status_code != 200:
             count = count + .5
-            save_progress(pd.DataFrame({'user_id': list(total_ids)}))
+            save_progress(total_ids, current_user_ids )
             print(f"Error while fetching data for user {username}: {response.status_code} saving progress")
             return
     except requests.exceptions.ConnectTimeout:
-        save_progress(pd.DataFrame({'user_id': list(total_ids)}))
+        save_progress(total_ids, current_user_ids )
         print(f"Connection to {url} timed out. Skipping this user.")
         return
     except requests.exceptions.RequestException as e:
-        save_progress(pd.DataFrame({'user_id': list(total_ids)}))
+        save_progress(total_ids, current_user_ids )
         print(f"An error occurred: {e}")
         return
 
