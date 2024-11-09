@@ -32,10 +32,8 @@ def getnops(n, username, user_ids):
     url = "https://lichess.org/api/games/user/" + username
     try:
         print('Requesting data for:', username)
-        response = requests.get(url, headers=headers, params={"max": n}, stream=True, timeout=10)  # Increase timeout to 10 seconds
+        response = requests.get(url, headers=headers, params={"max": n}, stream=True, timeout=600)  
         if response.status_code == 429:
-            if count < 11:
-                count = count + .3
             print(f"Rate limited. Waiting {30 + 2**count} seconds...")
             time.sleep(30 + 2**count) 
             return
@@ -90,7 +88,7 @@ for user in STARTING_USERS:
         else: 
             continue
         print("Fetching games for:", searchUser)
-        getnops(150, searchUser, current_user_ids)
+        getnops(200, searchUser, current_user_ids)
         time.sleep(0.5)
         print("Fetched games for:", searchUser)
         used_ids.add(searchUser)
