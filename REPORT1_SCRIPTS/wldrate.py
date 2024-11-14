@@ -2,7 +2,7 @@ import requests
 import json  # Import json to handle JSON parsing
 import pandas as pd
 
-df = pd.read_csv('nullcsv.csv')
+df = pd.read_csv('completeUserIds_1_2.csv')
 
 #----------------------------------------------------------------------------------#
 #fetch blitz games only
@@ -19,7 +19,7 @@ def fetch_blitz_games(username, max_blitz_games=100, max_total_games=300):
     blitz_game_count = 0
     total_games_checked = 0
     batch_size = 100
-    timeout = 10  # Set a timeout of 10 seconds
+    timeout = 300  # Set a timeout of 10 seconds
 
     while blitz_game_count < max_blitz_games and total_games_checked < max_total_games:
         params = {
@@ -97,20 +97,20 @@ def fetch_blitz_games(username, max_blitz_games=100, max_total_games=300):
 #save current progress
 def save_progress(df):
     """Saves the DataFrame to progress.csv."""
-    df.to_csv('nprogress.csv', index=False)
+    df.to_csv('progress_4.csv', index=False)
     print("Progress saved to progress.csv")
 
 #continue from last user id
 def load_progress():
     """Loads progress from progress.csv and identifies the last user processed."""
     try:
-        progress_df = pd.read_csv('nprogress.csv')
+        progress_df = pd.read_csv('progress_4.csv')
         last_user_processed = progress_df['user_id'].iloc[-1]
         print(f"Resuming from user ID: {last_user_processed}")
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return pd.read_csv('nullcsv.csv'), None
+        return pd.read_csv('completeUserIds_1_2.csv'), None
     
     
 #--------------------------------------------------------------------------------------------#
@@ -188,7 +188,7 @@ def add_user_stats(df):
         start_index += 1
 
     # Final save to ensure all progress is written
-    df.to_csv('null_stats.csv', index=False)
+    df.to_csv('part2_10.csv', index=False)
     print("All users processed and final stats saved to final_stats.csv")
     
     return df
@@ -196,5 +196,5 @@ def add_user_stats(df):
 # Assuming get_win_rate and fetch_blitz_games functions are defined as in previous instructions
 df, _ = load_progress()
 df = add_user_stats(df)
-df.to_csv('nstats.csv', index=False)
+df.to_csv('part2_10.csv', index=False)
 
