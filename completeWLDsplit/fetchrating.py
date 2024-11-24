@@ -17,7 +17,7 @@ def load_progress():
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return pd.read_csv('completewld_1.csv'), None
+        return pd.read_csv('completewld_2.csv'), None
 
 def fetch_user_rating(user_id):
     url = f"https://lichess.org/api/user/{user_id}"
@@ -82,7 +82,7 @@ def add_user_ratings(df):
     
     return df
 
-df = pd.read_csv('completewld_1.csv')
+df = pd.read_csv('completewld_2.csv')
 df, _ = load_progress()
 df = add_user_ratings(df)
 df.to_csv('final.csv', index=False)
