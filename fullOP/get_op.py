@@ -10,7 +10,7 @@ if os.path.exists("progress_op.csv"):
 else:
     print("No existing progress_op.csv found.")
 
-df = pd.read_csv('deviation_stats.csv')
+df = pd.read_csv('split_part_1.csv')
 
 def save_progress(df):
     """Saves the DataFrame to progress_op.csv."""
@@ -27,7 +27,7 @@ def load_progress():
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return pd.read_csv('deviation_stats.csv'), None
+        return pd.read_csv('split_part_1.csv'), None
 
 
 headers = {"Accept": "application/x-ndjson"} 
@@ -56,13 +56,13 @@ def get_recent_op(username):
                     white_player = game_data["players"].get("white", {}).get("user", {}).get("name")
                     black_player = game_data["players"].get("black", {}).get("user", {}).get("name")
                     if "winner" in game_data:
-                        if white_player == username: 
+                        if white_player.lower() == username.lower(): 
                             op = black_player
                             if game_data["winner"] == "white":
                                 score = 1
                             elif game_data["winner"] == "black":
                                 score = -1
-                        elif black_player == username:
+                        elif black_player.lower() == username.lower():
                             op = white_player
                             if game_data["winner"] == "white":
                                 score = -1
@@ -70,9 +70,9 @@ def get_recent_op(username):
                                 score = 1
                     else: 
                         score = 0
-                        if white_player == username: 
+                        if white_player.lower() == username.lower(): 
                             op = black_player
-                        elif black_player == username:
+                        elif black_player.lower() == username.lower():
                             op = white_player
                             
                 print('white player:', white_player)
@@ -129,7 +129,7 @@ def add_user_stats(df):
         start_index += 1
 
     # Final save to ensure all progress is written
-    print("All users processed and final stats saved to deviation_stats.csv")
+    print("All users processed and final stats saved to split_part_1.csv")
     
     return df
 
