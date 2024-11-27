@@ -56,13 +56,13 @@ def get_recent_op(username):
                     white_player = game_data["players"].get("white", {}).get("user", {}).get("name")
                     black_player = game_data["players"].get("black", {}).get("user", {}).get("name")
                     if "winner" in game_data:
-                        if white_player.lower() == username.lower(): 
+                        if white_player == username: 
                             op = black_player
-                            if game_data["winner"] == "white":
+                            if white_player and game_data["winner"] == "white":
                                 score = 1
                             elif game_data["winner"] == "black":
                                 score = -1
-                        elif black_player.lower() == username.lower():
+                        elif black_player == username:
                             op = white_player
                             if game_data["winner"] == "white":
                                 score = -1
@@ -70,9 +70,9 @@ def get_recent_op(username):
                                 score = 1
                     else: 
                         score = 0
-                        if white_player.lower() == username.lower(): 
+                        if white_player == username: 
                             op = black_player
-                        elif black_player.lower() == username.lower():
+                        elif black_player == username:
                             op = white_player
                             
                 print('white player:', white_player)

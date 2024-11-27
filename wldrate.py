@@ -2,7 +2,7 @@ import requests
 import json  # Import json to handle JSON parsing
 import pandas as pd
 
-df = pd.read_csv('completeUserIds_1_2.csv')
+df = pd.read_csv('tiaSplit1.csv')
 
 #----------------------------------------------------------------------------------#
 #fetch blitz games only
@@ -97,20 +97,20 @@ def fetch_blitz_games(username, max_blitz_games=100, max_total_games=300):
 #save current progress
 def save_progress(df):
     """Saves the DataFrame to progress.csv."""
-    df.to_csv('progress_4.csv', index=False)
+    df.to_csv('progress.csv', index=False)
     print("Progress saved to progress.csv")
 
 #continue from last user id
 def load_progress():
     """Loads progress from progress.csv and identifies the last user processed."""
     try:
-        progress_df = pd.read_csv('progress_4.csv')
-        last_user_processed = progress_df['user_id'].iloc[-1]
+        progress_df = pd.read_csv('progress.csv')
+        last_user_processed = progress_df['op_id'].iloc[-1]
         print(f"Resuming from user ID: {last_user_processed}")
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return pd.read_csv('completeUserIds_1_2.csv'), None
+        return pd.read_csv('tiaSplit1.csv'), None
     
     
 #--------------------------------------------------------------------------------------------#
@@ -153,17 +153,17 @@ def add_user_stats(df):
     start_index = 0
     df, last_user_processed = load_progress()
     if last_user_processed:
-        start_index = df[df['user_id'] == last_user_processed].index[0] + 1
+        start_index = df[df['op_id'] == last_user_processed].index[0] + 1
         
     # Create empty columns for the stats
-    for col in ['win_rate', 'lose_rate', 'draw_rate', 'game_count']:
+    for col in ['op_win_rate', 'op_lose_rate', 'op_draw_rate', 'op_game_count']:
         if col not in df.columns:
             df[col] = 0.0
 
     while start_index < len(df):
         row = df.iloc[start_index]
-        user_id = row['user_id']
-        status, win_rate, lose_rate, draw_rate, game_count = get_win_rate(user_id)
+        op_id = row['op_id']
+        status, win_rate, lose_rate, draw_rate, game_count = get_win_rate(op_id)
 
         if status == "rate_limited":
             # Save progress and restart the loop to retry
@@ -171,11 +171,11 @@ def add_user_stats(df):
             print("Rate limit encountered. Retrying...")
             continue
         elif status == "failed":
-            print(f"Failed to retrieve data for {user_id}. Moving to next user.")
+            print(f"Failed to retrieve data for {op_id}. Moving to next user.")
             start_index += 1
             continue
         elif status == "no_games":
-            print(f"No Blitz games for {user_id}. Moving to next user.")
+            print(f"No Blitz games for {op_id}. Moving to next user.")
         else:
             # Update stats if successful
             df.at[start_index, 'win_rate'] = win_rate
@@ -196,5 +196,5 @@ def add_user_stats(df):
 # Assuming get_win_rate and fetch_blitz_games functions are defined as in previous instructions
 df, _ = load_progress()
 df = add_user_stats(df)
-df.to_csv('part2_10.csv', index=False)
+df.to_csv('tiaOPwldr.csv', index=False)
 
