@@ -205,7 +205,23 @@ def get_gameEnd_data(lines, username):
         time_lossrate = round(time_loss / total_losses, 3) if total_losses > 0 else 0     
         return mate_winrate, resign_winrate, time_winrate, mate_lossrate, resign_lossrate, time_lossrate
             
-                
+#--------------------------------------------------------------------------------------------#
+#Get average game length
+
+def get_game_lengths(lines):
+    durations = []
+    for game in lines:
+        game_data = json.loads(game)
+        created_at = game_data.get("createdAt")
+        last_move_at = game_data.get("lastMoveAt")
+        
+        if created_at is None or last_move_at is None:
+            continue
+            
+        duration = (last_move_at - created_at) // 1000
+        durations.append(duration)
+    return sum(durations)//len(durations)
+    
             
 #--------------------------------------------------------------------------------------------#
 
@@ -223,6 +239,8 @@ def get_game_data(username):
     white_win_rate, white_lose_rate, white_draw_rate, white_game_count, black_win_rate, black_lose_rate, black_draw_rate, black_game_count = get_color_specific_winrates(response_lines, username)
     
     mate_winrate, resign_winrate, time_winrate, mate_lossrate, resign_lossrate, time_lossrate = get_gameEnd_data(response_lines, username)
+    
+    average_game_len= get_game_lengths(response_lines)
     
     return {
         "status": "success",
@@ -243,7 +261,8 @@ def get_game_data(username):
         "time_winrate": time_winrate,
         "mate_lossrate": mate_lossrate,
         "resign_lossrate": resign_lossrate,
-        "time_lossrate": time_lossrate
+        "time_lossrate": time_lossrate,
+        "average_game_len": average_game_len
     }
     
 #--------------------------------------------------------------------------------------------#
@@ -283,6 +302,7 @@ def add_user_stats(df):
             df.at[index, 'mate_lossrate'] = 0
             df.at[index, 'resign_lossrate'] = 0
             df.at[index, "time_lossrate"] = 0
+            df.at[index, "average_game_len"] = 0
             continue
         elif game_data == "rate_limited":
             print("Rate limit reached. Saving progress and pausing.")
@@ -307,6 +327,7 @@ def add_user_stats(df):
         df.at[index, 'mate_lossrate'] = game_data["mate_lossrate"]
         df.at[index, 'resign_lossrate'] = game_data["resign_lossrate"]
         df.at[index, "time_lossrate"] = game_data["time_lossrate"]
+        df.at[index, "average_game_len"] = game_data["average_game_len"]
 
         print(f"Processed user {username}. Saving progress...")
         save_progress(df)
