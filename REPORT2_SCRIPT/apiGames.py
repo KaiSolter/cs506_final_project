@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import time
 
-df = pd.read_csv('../past_csv/small_sample.csv')
+df = pd.read_csv('../KaiUserStatswld.csv')
 
 #------------------------------------------------------------------------------------#
 #rate limit/ saving progress logic
@@ -24,7 +24,7 @@ def load_progress():
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return pd.read_csv('../past_csv/small_sample.csv'), None
+        return pd.read_csv('../KaiUserStatswld.csv'), None
     
 #--------------------------------------------------------------------------------------------#
 #fetching api response logic
@@ -121,6 +121,7 @@ def get_color_specific_winrates(lines, username):
 def get_ECO_data(lines, username):
     ECO_counts = {}
     ECO_wins = {}
+    ECO_winrates = {}
     for game in lines:
         game_data = json.loads(game)
         if "opening" in game_data and "eco" in game_data["opening"]:
