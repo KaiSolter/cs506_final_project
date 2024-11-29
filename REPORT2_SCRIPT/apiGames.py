@@ -221,6 +221,8 @@ def get_game_lengths(lines):
             
         duration = (last_move_at - created_at) // 1000
         durations.append(duration)
+    if durations == 0:
+        return 0
     return sum(durations)//len(durations)
     
             
