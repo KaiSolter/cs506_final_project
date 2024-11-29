@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import time
 
-df = pd.read_csv('../KaiUserStatswld.csv')
+df = pd.read_csv('../KaiUserStatswld1.csv')
 
 #------------------------------------------------------------------------------------#
 #rate limit/ saving progress logic
@@ -24,7 +24,7 @@ def load_progress():
         return progress_df, last_user_processed
     except FileNotFoundError:
         print("No progress file found. Starting from scratch.")
-        return pd.read_csv('../KaiUserStatswld.csv'), None
+        return pd.read_csv('../KaiUserStatswld1.csv'), None
     
 #--------------------------------------------------------------------------------------------#
 #fetching api response logic
@@ -221,7 +221,7 @@ def get_game_lengths(lines):
             
         duration = (last_move_at - created_at) // 1000
         durations.append(duration)
-    if durations == 0:
+    if len(durations) == 0:
         return 0
     return sum(durations)//len(durations)
     
