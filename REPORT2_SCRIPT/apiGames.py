@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import ChunkedEncodingError
 import json
 import pandas as pd
 import time
@@ -45,15 +46,25 @@ def get_game_json(username):
         "Accept": "application/x-ndjson",
         "User-Agent": "WinRateCalculator/1.0"
     }
-
-    response = requests.get(url, params=params, headers=headers, stream=True)
-    if response.status_code == 429:
-        print("Rate limit hit. Stopping process and saving progress.")
-        return None
-    if response.status_code != 200:
-        print(f"Failed to fetch data for {username}. Error code: {response.status_code}")
-        return None
-    return response
+    
+    max_retries = 5
+    retries = 0
+    while retries < max_retries:
+        try:
+            response = requests.get(url, params=params, headers=headers, stream=True, timeout=10)
+            if response.status_code == 429:
+                print("Rate limit hit. Stopping process and saving progress.")
+                return None
+            if response.status_code != 200:
+                print(f"Failed to fetch data for {username}. Error code: {response.status_code}")
+                return None
+            return response
+        except ChunkedEncodingError:
+            retries += 1
+            print(f"ChunkedEncodingError encountered. Retrying {retries}/{max_retries}...")
+            time.sleep(2)  # Pause before retrying
+    print(f"Failed to fetch data for {username} after {max_retries} retries.")
+    return None
 
 #--------------------------------------------------------------------------------------------#
 #Color specific winrates
