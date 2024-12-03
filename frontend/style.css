@@ -1,0 +1,66 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+button{
+    padding: 1vw;
+    font-size: 17px;
+    border: none;
+    cursor: pointer;
+    background-color: inherit;
+  } 
+
+form{
+    height: 10vh;
+    width: 25vw;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: lightblue;
+    margin: 1vh;
+
+}
+
+input{
+    height: 3vw;
+    width: 10vw;
+    border-radius: 1vh;
+    padding-left: 1vw;
+}
+
+#forms{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    background-color: azure;
+    height: 30vh;
+    width: 80vw;
+
+}
+
+nav{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+}
+
+nav ul{
+    display: flex;
+}
+
+nav ul li{
+    padding: 2vh;
+    list-style: none;
+}
+
+main{
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
