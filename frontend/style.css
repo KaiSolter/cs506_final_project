@@ -31,7 +31,7 @@ input {
 
 #forms {
     display: flex;
-    flex-direction: column; /* Changed to column for vertical stacking */
+    flex-direction: row; /* Changed to column for vertical stacking */
     align-items: center; /* Center all sections */
     gap: 2vh; /* Add spacing between each user section */
     background-color: azure;
@@ -96,4 +96,5 @@ main {
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    margin-top: 40px;
 }
