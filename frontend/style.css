@@ -1,17 +1,17 @@
-*{
+* {
     margin: 0;
     padding: 0;
 }
 
-button{
+button {
     padding: 1vw;
     font-size: 17px;
     border: none;
     cursor: pointer;
     background-color: inherit;
-  } 
+}
 
-form{
+form {
     height: 10vh;
     width: 25vw;
     display: flex;
@@ -20,45 +20,78 @@ form{
     justify-content: center;
     background-color: lightblue;
     margin: 1vh;
-
 }
 
-input{
+input {
     height: 3vw;
     width: 10vw;
     border-radius: 1vh;
     padding-left: 1vw;
 }
 
-#forms{
+#forms {
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
+    flex-direction: column; /* Changed to column for vertical stacking */
+    align-items: center; /* Center all sections */
+    gap: 2vh; /* Add spacing between each user section */
     background-color: azure;
-    height: 30vh;
     width: 80vw;
-
+    padding: 2vh;
 }
 
-nav{
+.user-section {
+    display: flex;
+    flex-direction: column; /* Ensure form and table are stacked vertically */
+    align-items: center; /* Center-align the content */
+    gap: 1vh; /* Add spacing between form and table */
+    width: 100%; /* Match the width of the parent container */
+}
+
+.stats-section {
+    width: 25vw; /* Match the width of the form for a consistent layout */
+    text-align: center;
+}
+
+table {
+    width: 100%; /* Take full width of the stats section */
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #007acc;
+    color: white;
+}
+
+td {
+    background-color: #f9f9f9;
+}
+
+nav {
     display: flex;
     flex-direction: row;
     align-items: center;
-
 }
 
-nav ul{
+nav ul {
     display: flex;
 }
 
-nav ul li{
+nav ul li {
     padding: 2vh;
     list-style: none;
 }
 
-main{
-    height: 80vh;
+main {
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;

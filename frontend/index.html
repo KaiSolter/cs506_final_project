@@ -20,18 +20,46 @@
             </ul>
         </nav>
         <main>
-            <div id = 'forms'>
-                <form>
-                    <input type="text" placeholder="User 1" name="search">
-                    <button type="submit"><i class="fa fa-search"></i></button>
-                </form>      
-                <form>
-                    <input type="text" placeholder="User 2" name="search">
-                    <button type="submit"><i class="fa fa-search"></i></button>
-                </form>    
-            </div>     
+            <div id="forms">
+                <div class="user-section">
+                    <form id="form1">
+                        <input type="text" placeholder="User 1" name="user1" id="user1">
+                        <button type="button" onclick="fetchData('user1', 'stats1')"><i class="fa fa-search"></i></button>
+                    </form>
+                    <div id="stats1" class="stats-section">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats1-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="user-section">
+                    <form id="form2">
+                        <input type="text" placeholder="User 2" name="user2" id="user2">
+                        <button type="button" onclick="fetchData('user2', 'stats2')"><i class="fa fa-search"></i></button>
+                    </form>   
+                    <div id="stats2" class="stats-section">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stats2-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>     
+            </div>
         </main>
     </div>
-    
+    <script src="fetchData.js"></script>
 </body>
 </html>
