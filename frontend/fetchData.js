@@ -4,9 +4,9 @@ async function fetchData(inputID, statsID) {
     alert("You must enter a username");
     return;
   }
-  const URL = "https://lichess.org/api/user/" + username + "/perf/blitz";
+  const USERURL = "https://lichess.org/api/user/" + username + "/perf/blitz";
   try {
-    const response = await fetch(URL);
+    const response = await fetch(USERURL);
     if (response.status != 200) {
       throw new Error("Failed to fetch user data:", response.status);
     }
@@ -42,8 +42,33 @@ async function fetchData(inputID, statsID) {
     addTableRow(tableBody, "Highest Rated Win", bw1);
     addTableRow(tableBody, "Second Highest Rated Win", bw2);
     addTableRow(tableBody, "Third Highest Rated Win", bw3);
+  } catch (e) {
+    console.error(e);
+  }
 
-    alert(`User's blitz rating: ${rating}`);
+  try {
+    const params = new URLSearchParams({
+      max: 110,
+      perfType: "blitz",
+      opening: "true",
+      clocks: "true",
+      evals: "false",
+      pgnInJson: "true",
+    });
+
+    const baseURL = "https://lichess.org/api/games/user/";
+    const GAMEURL = `${baseURL}${username}?${params.toString()}`;
+    console.log(GAMEURL);
+    const response = await fetch(GAMEURL, {
+      headers: {
+        Accept: "application/x-ndjson", // Request NDJSON format
+      },
+    });
+    if (response.status != 200) {
+      throw new Error("Failed to fetch user data:", response.status);
+    }
+    const data = await response.json();
+    console.log(data);
   } catch (e) {
     console.error(e);
   }
