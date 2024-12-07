@@ -1,9 +1,17 @@
+/* Main controller function */
 async function fetchData(inputID, statsID) {
   const username = document.getElementById(inputID).value.trim();
   if (!username) {
     alert("You must enter a username");
     return;
   }
+  await fetchUserAPI(username, statsID);
+  await fetchGameAPI(username, statsID);
+}
+
+/*Helper functions for different apiReqs*/
+//User Api
+async function fetchUserAPI(username, statsID) {
   const USERURL = "https://lichess.org/api/user/" + username + "/perf/blitz";
   try {
     const response = await fetch(USERURL);
@@ -45,7 +53,10 @@ async function fetchData(inputID, statsID) {
   } catch (e) {
     console.error(e);
   }
+}
 
+//Game Api
+async function fetchGameAPI(username, statsID) {
   try {
     const params = new URLSearchParams({
       max: 110,
@@ -58,7 +69,6 @@ async function fetchData(inputID, statsID) {
 
     const baseURL = "https://lichess.org/api/games/user/";
     const GAMEURL = `${baseURL}${username}?${params.toString()}`;
-    console.log(GAMEURL);
     const response = await fetch(GAMEURL, {
       headers: {
         Accept: "application/x-ndjson", // Request NDJSON format
