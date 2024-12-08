@@ -11,33 +11,84 @@ async function fetchData(inputID, statsID) {
 
 /*Helper functions for different apiReqs*/
 //User Api
+// async function fetchUserAPI(username, statsID) {
+//   const USERURL = "https://lichess.org/api/user/" + username + "/perf/blitz";
+//   try {
+//     const response = await fetch(USERURL);
+//     if (response.status != 200) {
+//       throw new Error("Failed to fetch user data:", response.status);
+//     }
+
+//     const data = await response.json();
+//     const rating = data?.perf?.glicko?.rating || "N/A";
+
+//     const deviation = data?.perf?.glicko?.deviation || "N/A";
+
+//     const totalGames = data?.stat?.count?.all || "N/A";
+
+//     const bestWins = data?.stat?.bestWins?.results || [];
+//     let bw1 = null;
+//     let bw2 = null;
+//     let bw3 = null;
+//     if (bestWins.length >= 3) {
+//       bw1 = bestWins[0]?.opRating || 0;
+//       bw2 = bestWins[1]?.opRating || 0;
+//       bw3 = bestWins[2]?.opRating || 0;
+//     } else {
+//       bw1 = 0;
+//       bw2 = 0;
+//       bw3 = 0;
+//     }
+
+//     const tableBody = document.getElementById(`${statsID}-table-body`);
+//     tableBody.innerHTML = ""; // Clear previous data
+
+//     // Add rows to the table
+//     addTableRow(tableBody, "Blitz Rating", rating);
+//     addTableRow(tableBody, "Rating Deviation", deviation);
+//     addTableRow(tableBody, "Total Games Played", totalGames);
+//     addTableRow(tableBody, "Highest Rated Win", bw1);
+//     addTableRow(tableBody, "Second Highest Rated Win", bw2);
+//     addTableRow(tableBody, "Third Highest Rated Win", bw3);
+//   } catch (e) {
+//     console.error(e);
+//   }
+// }
+
 async function fetchUserAPI(username, statsID) {
   const USERURL = "https://lichess.org/api/user/" + username + "/perf/blitz";
   try {
     const response = await fetch(USERURL);
-    if (response.status != 200) {
-      throw new Error("Failed to fetch user data:", response.status);
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch user data: ${response.status}`);
     }
 
     const data = await response.json();
     const rating = data?.perf?.glicko?.rating || "N/A";
-
     const deviation = data?.perf?.glicko?.deviation || "N/A";
-
     const totalGames = data?.stat?.count?.all || "N/A";
 
+    // Extract the best wins
     const bestWins = data?.stat?.bestWins?.results || [];
-    let bw1 = null;
-    let bw2 = null;
-    let bw3 = null;
+    console.log(bestWins);
+    let userBestWin1 = { opRating: "N/A", opponent: "N/A" };
+    let userBestWin2 = { opRating: "N/A", opponent: "N/A" };
+    let userBestWin3 = { opRating: "N/A", opponent: "N/A" };
+
+    // Extract detailed info for the top 3 wins
     if (bestWins.length >= 3) {
-      bw1 = bestWins[0]?.opRating || 0;
-      bw2 = bestWins[1]?.opRating || 0;
-      bw3 = bestWins[2]?.opRating || 0;
-    } else {
-      bw1 = 0;
-      bw2 = 0;
-      bw3 = 0;
+      userBestWin1 = {
+        opRating: bestWins[0]?.opRating || "N/A",
+        opponent: bestWins[0]?.opId?.name || "Unknown" // Fallback to "Unknown" if opName is missing
+      };
+      userBestWin2 = {
+        opRating: bestWins[1]?.opRating || "N/A",
+        opponent: bestWins[1]?.opId?.name || "Unknown"
+      };
+      userBestWin3 = {
+        opRating: bestWins[2]?.opRating || "N/A",
+        opponent: bestWins[2]?.opId?.name || "Unknown"
+      };
     }
 
     const tableBody = document.getElementById(`${statsID}-table-body`);
@@ -47,13 +98,27 @@ async function fetchUserAPI(username, statsID) {
     addTableRow(tableBody, "Blitz Rating", rating);
     addTableRow(tableBody, "Rating Deviation", deviation);
     addTableRow(tableBody, "Total Games Played", totalGames);
-    addTableRow(tableBody, "Highest Rated Win", bw1);
-    addTableRow(tableBody, "Second Highest Rated Win", bw2);
-    addTableRow(tableBody, "Third Highest Rated Win", bw3);
+    addTableRow(
+      tableBody,
+      "Highest Rated Win",
+      `${userBestWin1.opRating} vs ${userBestWin1.opponent}`
+    );
+    addTableRow(
+      tableBody,
+      "Second Highest Rated Win",
+      `${userBestWin2.opRating} vs ${userBestWin2.opponent}`
+    );
+    addTableRow(
+      tableBody,
+      "Third Highest Rated Win",
+      `${userBestWin3.opRating} vs ${userBestWin3.opponent}`
+    );
   } catch (e) {
     console.error(e);
   }
 }
+
+
 
 //Game Api
 
