@@ -35,6 +35,11 @@ jobs:
         run: |
           make run 
           cat model_output.log
+    
+      - name: Print Model Output Log
+        run: |
+            echo "Contents of model_output.log:"
+            cat model_output.log
 
       # Verify output contains expected text
       - name: Verify Output
