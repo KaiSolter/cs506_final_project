@@ -15,12 +15,12 @@ $(VENV_DIR):
 # Install libraries from requirements.txt
 install: $(VENV_DIR)
 	$(VENV_DIR)/bin/pip install --upgrade pip
-	$(VENV_DIR)/bin/pip install -r $(REQUIREMENTS) > model_output.log 2>&1
+	$(VENV_DIR)/bin/pip install -r $(REQUIREMENTS) 
 
 # Run the Python script using the virtual environment
 .PHONY: run
 run: install
-	$(VENV_DIR)/bin/python $(PYTHON_SCRIPT)
+	$(VENV_DIR)/bin/python $(PYTHON_SCRIPT) > model_output.log 2>&1
 
 # Clean up virtual environment
 .PHONY: clean
