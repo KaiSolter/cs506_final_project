@@ -33,13 +33,13 @@ jobs:
       - name: Run Makefile
         id: run-makefile
         run: |
-          make run > output.log 2>&1
-          cat output.log
+          make run 
+          cat model_output.log
 
       # Verify output contains expected text
       - name: Verify Output
         run: |
-          if ! grep -q "Accuracy with Selected Parameters: 0.5935176925364258" output.log; then
+          if ! grep -q "Accuracy with Selected Parameters: 0.5935176925364258" model_output.log; then
             echo "Verification failed: Expected text not found in output"
             exit 1
           fi
