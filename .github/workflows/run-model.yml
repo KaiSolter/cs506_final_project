@@ -1,4 +1,4 @@
-name: Run Model
+name: Verify Model Output
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - final-report
 
 jobs:
-  run-model:
+  verify-model-output:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,6 +29,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y make
 
-      # Run the Makefile
+      # Run the Makefile and capture output
       - name: Run Makefile
-        run: make run
+        id: run-makefile
+        run: |
+          make run > output.log 2>&1
+          cat output.log
+
+      # Verify output contains expected text
+      - name: Verify Output
+        run: |
+          if ! grep -q "Accuracy with Selected Parameters: 0.5935176925364258" output.log; then
+            echo "Verification failed: Expected text not found in output"
+            exit 1
+          fi
