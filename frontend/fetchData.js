@@ -1,59 +1,119 @@
 /* Main controller function */
+// async function fetchData(inputID, statsID) {
+//   const username = document.getElementById(inputID).value.trim();
+//   if (!username) {
+//     alert("You must enter a username");
+//     return;
+//   }
+//   await fetchUserAPI(username, statsID);
+//   await fetchGameAPI(username, statsID);
+
+// }
+
+let pyodideInstance;
+
+// Function to load Pyodide and its required packages
+async function loadPyodideAndPackages() {
+  const pyodide = await loadPyodide(); // Initialize Pyodide
+  console.log("Pyodide core loaded."); // Debugging
+  await pyodide.loadPackage(['numpy', 'scikit-learn', 'joblib']); // Load necessary packages
+  console.log("Packages loaded:", pyodide.loadedPackages); // Debugging
+  pyodideInstance = pyodide; // Assign the instance
+  console.log("Pyodide instance assigned:", pyodideInstance); // Debugging
+}
+
+
+// Call the function to initialize Pyodide
+const pyodideReadyPromise = loadPyodideAndPackages();
+pyodideReadyPromise
+    .then(() => {
+        console.log("Pyodide successfully initialized. Loading the model...");
+        return loadModelFromJSON();
+    })
+    .then(() => {
+        console.log("Model is ready for predictions.");
+    })
+    .catch((e) => {
+        console.error("Error during Pyodide or model initialization:", e.message);
+    });
+
+
+
 async function fetchData(inputID, statsID) {
   const username = document.getElementById(inputID).value.trim();
   if (!username) {
-    alert("You must enter a username");
-    return;
+      alert("You must enter a username");
+      return;
   }
+
   await fetchUserAPI(username, statsID);
   await fetchGameAPI(username, statsID);
+
+  // Collect stats for predictions
+  const statsTableBody = document.getElementById(`${statsID}-table-body`);
+  const stats = Array.from(statsTableBody.rows).map((row) => {
+      const value = row.cells[1].textContent;
+      return parseFloat(value) || 0; // Parse as float or use 0 as fallback
+  });
+
+  // Save stats globally for prediction
+  if (statsID === "stats1") {
+      window.user1Stats = stats;
+  } else if (statsID === "stats2") {
+      window.user2Stats = stats;
+  }
 }
 
-/*Helper functions for different apiReqs*/
-//User Api
-// async function fetchUserAPI(username, statsID) {
-//   const USERURL = "https://lichess.org/api/user/" + username + "/perf/blitz";
-//   try {
-//     const response = await fetch(USERURL);
-//     if (response.status != 200) {
-//       throw new Error("Failed to fetch user data:", response.status);
-//     }
 
-//     const data = await response.json();
-//     const rating = data?.perf?.glicko?.rating || "N/A";
 
-//     const deviation = data?.perf?.glicko?.deviation || "N/A";
+function triggerPrediction() {
+  if (window.user1Stats && window.user2Stats) {
+      console.log("Triggering prediction with stats:", window.user1Stats, window.user2Stats);
+      predictOutcome(window.user1Stats, window.user2Stats);
+  } else {
+      alert("Stats for both users are not yet loaded. Please fetch data for both users first.");
+  }
+}
+async function predictOutcome(user1Stats, user2Stats) {
+  if (!pyodideInstance) {
+      alert("Pyodide is not yet ready. Please wait.");
+      return;
+  }
 
-//     const totalGames = data?.stat?.count?.all || "N/A";
+  try {
+      // Convert JavaScript stats arrays to Python-compatible objects
+      const user1StatsPy = pyodideInstance.toPy(user1Stats);
+      const user2StatsPy = pyodideInstance.toPy(user2Stats);
 
-//     const bestWins = data?.stat?.bestWins?.results || [];
-//     let bw1 = null;
-//     let bw2 = null;
-//     let bw3 = null;
-//     if (bestWins.length >= 3) {
-//       bw1 = bestWins[0]?.opRating || 0;
-//       bw2 = bestWins[1]?.opRating || 0;
-//       bw3 = bestWins[2]?.opRating || 0;
-//     } else {
-//       bw1 = 0;
-//       bw2 = 0;
-//       bw3 = 0;
-//     }
+      // Inject the data into Pyodide's Python environment
+      pyodideInstance.globals.set("user1_stats", user1StatsPy);
+      pyodideInstance.globals.set("user2_stats", user2StatsPy);
 
-//     const tableBody = document.getElementById(`${statsID}-table-body`);
-//     tableBody.innerHTML = ""; // Clear previous data
+      // Execute the Python function
+      const result = await pyodideInstance.runPythonAsync(`
+        def predict_outcome(user1_stats, user2_stats):
+          features = user1_stats + user2_stats
+          prediction = model.predict([features])
+          return prediction[0]
 
-//     // Add rows to the table
-//     addTableRow(tableBody, "Blitz Rating", rating);
-//     addTableRow(tableBody, "Rating Deviation", deviation);
-//     addTableRow(tableBody, "Total Games Played", totalGames);
-//     addTableRow(tableBody, "Highest Rated Win", bw1);
-//     addTableRow(tableBody, "Second Highest Rated Win", bw2);
-//     addTableRow(tableBody, "Third Highest Rated Win", bw3);
-//   } catch (e) {
-//     console.error(e);
-//   }
-// }
+        # Call the function and return the result
+        predict_outcome(user1_stats, user2_stats)
+      `);
+
+      console.log("Prediction result:", result);
+      alert(`The predicted outcome is: ${result}`);
+  } catch (e) {
+      console.error("Error during prediction:", e);
+  }
+}
+
+
+
+
+
+
+
+
 
 async function fetchUserAPI(username, statsID) {
   const USERURL = "https://lichess.org/api/user/" + username + "/perf/blitz";
@@ -119,148 +179,147 @@ async function fetchUserAPI(username, statsID) {
 }
 
 
-
-//Game Api
-
-// async function fetchGameAPI(username, statsID) {
-//   try {
-//     const params = new URLSearchParams({
-//       max: 300,
-//       perfType: "blitz",
-//       opening: true,
-//       clocks: true,
-//       evals: false,
-//       pgnInJson: true,
-//     });
-
-//     const baseURL = "https://lichess.org/api/games/user/";
-//     const GAMEURL = `${baseURL}${username}?${params.toString()}`;
-//     const response = await fetch(GAMEURL, {
-//       headers: {
-//         Accept: "application/x-ndjson",
-//       },
-//     });
-//     if (response.status !== 200) {
-//       throw new Error(`Failed to fetch games data: ${response.status}`);
-//     }
-
-//     const tableBody = document.getElementById(`${statsID}-table-body`);
-//     const reader = response.body.getReader();
-//     const decoder = new TextDecoder("utf-8");
-
-//     // Initialize overall stats
-//     let winCount = 0,
-//       lossCount = 0,
-//       drawCount = 0,
-//       blitzGameCount = 0,
-//       totalGamesChecked = 0;
-
-//     // Initialize color-specific stats
-//     let whiteWinCount = 0,
-//       whiteLossCount = 0,
-//       whiteDrawCount = 0,
-//       whiteGameCount = 0;
-//     let blackWinCount = 0,
-//       blackLossCount = 0,
-//       blackDrawCount = 0,
-//       blackGameCount = 0;
-
-//     while (true) {
-//       const { done, value } = await reader.read();
-//       if (done) break;
-
-//       const lines = decoder.decode(value).split("\n").filter(Boolean);
-
-//       for (const line of lines) {
-//         const gameData = JSON.parse(line);
-//         totalGamesChecked++;
-
-//         // Overall stats
-//         if (gameData.speed === "blitz") {
-//           blitzGameCount++;
-//           if (gameData.winner) {
-//             if (
-//               (gameData.players.white.user?.name.toLowerCase() === username.toLowerCase() &&
-//                 gameData.winner === "white") ||
-//               (gameData.players.black.user?.name.toLowerCase() === username.toLowerCase() &&
-//                 gameData.winner === "black")
-//             ) {
-//               winCount++;
-//             } else {
-//               lossCount++;
-//             }
-//           } else {
-//             drawCount++;
-//           }
-//         }
-
-//         // White-specific stats
-//         if (gameData?.players?.white?.user?.name.toLowerCase() === username.toLowerCase()) {
-//           whiteGameCount++;
-//           if (gameData.winner === "white") {
-//             whiteWinCount++;
-//           } else if (gameData.winner === "black") {
-//             whiteLossCount++;
-//           } else {
-//             whiteDrawCount++;
-//           }
-//         }
-
-//         // Black-specific stats
-//         if (gameData?.players?.black?.user?.name.toLowerCase() === username.toLowerCase()) {
-//           blackGameCount++;
-//           if (gameData.winner === "black") {
-//             blackWinCount++;
-//           } else if (gameData.winner === "white") {
-//             blackLossCount++;
-//           } else {
-//             blackDrawCount++;
-//           }
-//         }
-//       }
-
-//       if (blitzGameCount >= 100 || totalGamesChecked >= 300) break;
-//     }
-
-//     // Calculate overall rates
-//     const winRate = ((winCount / blitzGameCount) * 100).toFixed(2) || "0.00";
-//     const lossRate = ((lossCount / blitzGameCount) * 100).toFixed(2) || "0.00";
-//     const drawRate = ((drawCount / blitzGameCount) * 100).toFixed(2) || "0.00";
-
-//     // Calculate white-specific rates
-//     const whiteWinRate = ((whiteWinCount / whiteGameCount) * 100).toFixed(2) || "0.00";
-//     const whiteLoseRate = ((whiteLossCount / whiteGameCount) * 100).toFixed(2) || "0.00";
-//     const whiteDrawRate = ((whiteDrawCount / whiteGameCount) * 100).toFixed(2) || "0.00";
-
-//     // Calculate black-specific rates
-//     const blackWinRate = ((blackWinCount / blackGameCount) * 100).toFixed(2) || "0.00";
-//     const blackLoseRate = ((blackLossCount / blackGameCount) * 100).toFixed(2) || "0.00";
-//     const blackDrawRate = ((blackDrawCount / blackGameCount) * 100).toFixed(2) || "0.00";
-
+// async function loadModel() {
+//   // Wait for Pyodide to load
   
+//   pyodideInstance = await pyodideReadyPromise;
+//   if (!pyodideInstance) {
+//     console.error("Pyodide is not yet initialized.");
+//     return;
+//   }
+//   console.log("Pyodide initialized:", pyodideInstance);
+//   console.log("Pyodide instance properties:", Object.keys(pyodideInstance));
 
-//     // Add overall stats to the table
-//     addTableRow(tableBody, "Overall Win Rate (%)", winRate);
-//     addTableRow(tableBody, "Overall Loss Rate (%)", lossRate);
-//     addTableRow(tableBody, "Overall Draw Rate (%)", drawRate);
-//     addTableRow(tableBody, "Total Blitz Games", blitzGameCount);
-//     addTableRow(tableBody, "Games Analyzed", totalGamesChecked);
+//   console.log("Filesystem check:", pyodideInstance.FS);
 
-//     // Add white-specific stats to the table
-//     addTableRow(tableBody, "White Win Rate (%)", whiteWinRate);
-//     addTableRow(tableBody, "White Loss Rate (%)", whiteLoseRate);
-//     addTableRow(tableBody, "White Draw Rate (%)", whiteDrawRate);
-//     addTableRow(tableBody, "White Game Count", whiteGameCount);
 
-//     // Add black-specific stats to the table
-//     addTableRow(tableBody, "Black Win Rate (%)", blackWinRate);
-//     addTableRow(tableBody, "Black Loss Rate (%)", blackLoseRate);
-//     addTableRow(tableBody, "Black Draw Rate (%)", blackDrawRate);
-//     addTableRow(tableBody, "Black Game Count", blackGameCount);
+//   // Fetch the model file
+//   const response = await fetch('./model/best_random_forest.pkl');
+//   if (!response.ok) {
+//       console.error('Failed to fetch the .pkl file. Status:', response.status);
+//       return;
+//   }
+
+//   const arrayBuffer = await response.arrayBuffer();
+//     try {
+//         pyodideInstance.FS.writeFile('/best_random_forest.pkl', new Uint8Array(arrayBuffer));
+//         console.log('File written to Pyodide virtual filesystem:', pyodideInstance.FS.readdir('/'));
+//     } catch (e) {
+//         console.error('Error writing the model to Pyodide FS:', e);
+//         return;
+//     }
+
+
+//   // Load the model in Python
+//   const pythonCode = `
+// import joblib
+
+// # Load the model
+// model = joblib.load('/best_random_forest.pkl')
+
+// # Define the predict_outcome function
+// def predict_outcome(user1_stats, user2_stats):
+//     features = user1_stats + user2_stats
+//     prediction = model.predict([features])
+//     return prediction[0]
+//   `;
+//   try {
+//       await pyodideInstance.runPythonAsync(pythonCode);
+//       console.log('Random Forest model loaded successfully!');
 //   } catch (e) {
-//     console.error(e);
+//       console.error('Error loading the model in Pyodide:', e);
 //   }
 // }
+
+// async function loadModel() {
+//   try {
+      
+//       // Fetch the model file
+//       const response = await fetch('./model/best_random_forest.pkl');
+//       if (!response.ok) {
+//           throw new Error(`Failed to fetch the .pkl file. Status: ${response.status}`);
+//       }
+
+//       const arrayBuffer = await response.arrayBuffer();
+//       try {
+//           pyodideInstance.FS.writeFile('/best_random_forest.pkl', new Uint8Array(arrayBuffer));
+//           console.log('File written to Pyodide virtual filesystem:', pyodideInstance.FS.readdir('/'));
+//           const files = pyodideInstance.FS.readdir('/');
+//           if (!files.includes('best_random_forest.pkl')) {
+//               throw new Error('Model file is missing from the Pyodide filesystem.');
+//           }
+//       } catch (e) {
+//           throw new Error(`Error writing the model to Pyodide FS: ${e.message}`);
+//       }
+
+//       // Load model in Python
+//       const pythonCode = `
+//           import joblib
+
+//           # Load the model
+//           model = joblib.load('/best_random_forest.pkl')
+
+//           # Define the predict_outcome function
+//           def predict_outcome(user1_stats, user2_stats):
+//               features = user1_stats + user2_stats
+//               prediction = model.predict([features])
+//               return prediction[0]
+//       `;
+//       try {
+//           await pyodideInstance.runPythonAsync(pythonCode);
+//           console.log('Random Forest model loaded successfully!');
+//       } catch (e) {
+//           throw new Error(`Error running Python code: ${e.message}`);
+//       }
+//   } catch (e) {
+//       console.error('Error during model loading:', e.message);
+//       throw e; // Propagate error for outer handling
+//   }
+// }
+
+// Fetch and parse the JSON model
+async function loadModelFromJSON() {
+  // Fetch the JSON file
+  const response = await fetch('./model/model.json');
+  if (!response.ok) {
+    throw new Error(`Failed to fetch the model JSON: ${response.status}`);
+  }
+  
+  const arrayBuffer = await response.arrayBuffer();
+
+  // Write the JSON file to Pyodide's virtual filesystem
+  pyodideInstance.FS.writeFile('/model.json', new Uint8Array(arrayBuffer));
+  console.log('Model JSON file written to Pyodide FS:', pyodideInstance.FS.readdir('/'));
+
+  // Load and rebuild the model in Python
+  await pyodideInstance.runPythonAsync(`
+      import json
+      import numpy as np
+      from sklearn.ensemble import RandomForestClassifier
+
+      # Load the JSON model into Python
+      with open('/model.json', 'r') as f:
+          model_data = json.load(f)
+
+      # Rebuild the Random Forest model
+      model = RandomForestClassifier(
+          n_estimators=model_data["n_estimators"],
+          max_depth=model_data["max_depth"],
+          random_state=model_data["random_state"]
+      )
+      # Load parameters if needed (e.g., feature importances)
+      model.n_features_in_ = len(model_data["feature_importances"])
+      model.feature_importances = np.array(model_data["feature_importances"])
+  `);
+
+  console.log('Random Forest model rebuilt successfully in Pyodide.');
+}
+
+
+
+
+
+
 const ecoMapping = {
   "A00": "Ware Opening",
   "A01": "The Scientist's Method",
@@ -766,6 +825,7 @@ const ecoMapping = {
 
 async function fetchGameAPI(username, statsID) {
   try {
+    console.log("Fetching games for user:", username); // Debug 1
     const params = new URLSearchParams({
       max: 300,
       perfType: "blitz",
@@ -986,6 +1046,9 @@ async function fetchGameAPI(username, statsID) {
     console.error(e);
   }
 }
+
+
+
 
 
 
