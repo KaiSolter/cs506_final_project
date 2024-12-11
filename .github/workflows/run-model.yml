@@ -3,10 +3,10 @@ name: Verify Model Output
 on:
   push:
     branches:
-      - final-report
+      - main
   pull_request:
     branches:
-      - final-report
+      - main
 
 jobs:
   verify-model-output:
