@@ -57,7 +57,7 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
    Distribution of working rating deviation for users and opponents (2 graphs): Distribution of Win rates for users and opponents:
 
    ![Sorry the image isn't available. Check the final.ipynb ](images/ratingDev.png)
-   ![Sorry the image isn't available. Check the final.ipynb ](images/OpRatingDev.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/opRatingDev.png)
 
    Distribution of White user win rates and Black opponent win rates to represent distribution of overall win rates:
 
