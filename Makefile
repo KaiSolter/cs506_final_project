@@ -21,6 +21,7 @@ install: $(VENV_DIR)
 .PHONY: run
 run: install
 	$(VENV_DIR)/bin/python $(PYTHON_SCRIPT) > model_output.log 2>&1
+	cat model_output.log
 
 # Clean up virtual environment
 .PHONY: clean
