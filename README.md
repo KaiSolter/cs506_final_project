@@ -16,11 +16,11 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 
 3. **Data Collection**
 
-   Our data sample contains a set of users from distinct lichess rating sub-brackets, overall ranging from around 550 to 2750, as the minimum rating on the platform is 400 and the max is 2900. To build this dataset, we manually pick users that fall in the median of each 150-point rating sub-bracket, a choice driven by our data collection method. Specifically, our approach involves repeatedly retrieving each user’s past 15 opponents recursively, 
+  Our data sample contains a set of users from distinct lichess rating sub-brackets, overall ranging from around 550 to 2750, as the minimum rating on the platform is 400 and the max is 2900. To build this dataset, we manually pick users that fall in the median of each 150-point rating sub-bracket, a choice driven by our data collection method. Specifically, our approach involves repeatedly retrieving each user’s past 15 opponents recursively, 
 
-   adding these players to the user\_id list. We continued until reaching a list of approximately 18,000 unique user\_ids. Once we established this user base, we looped through the list of user\_ids to obtain each user's Blitz rating from the Lichess API. Focusing on Blitz-style gameplay, we used this list to retrieve additional game-related features from each user's recent Blitz games.
+  adding these players to the user\_id list. We continued until reaching a list of approximately 18,000 unique user\_ids. Once we established this user base, we looped through the list of user\_ids to obtain each user's Blitz rating from the Lichess API. Focusing on Blitz-style gameplay, we used this list to retrieve additional game-related features from each user's recent Blitz games.
 
-   These features include:
+  These features include:
 
   1. **Blitz Rating** (blitz\_rating): The user’s current rating in Blitz.
   2. **Total Blitz Games Played** (blitz\_total\_games): The all-time number of Blitz games played by the user on Lichess.
