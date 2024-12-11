@@ -41,17 +41,40 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 4. **Preliminary Data Analysis** 
 
    To begin with, we got a preliminary rating distribution of our users and opponents as shown below (2 graphs):
-   ![Preliminary Distribution](images/precleanRating.png)
+
+   ![Sorry the image isn't available. Check the final.ipynb ](images/precleanRating.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/precleanOpRating.png)
 
    This should be matched to follow the same rating distribution of active blitz users on lichess:
 
+   ![Sorry the image isn't available. Check the final.ipynb ](images/ratingDistribution.png)
+
    Distribution of blitz rating for users and opponents of our dataset after basic cleaning (2 graphs): 
+
+   ![Sorry the image isn't available. Check the final.ipynb ](images/cleanRating.png)  
+   ![Sorry the image isn't available. Check the final.ipynb ](images/cleanOpRating.png)
 
    Distribution of working rating deviation for users and opponents (2 graphs): Distribution of Win rates for users and opponents:
 
+   ![Sorry the image isn't available. Check the final.ipynb ](images/ratingDev.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/OpRatingDev.png)
+
    Distribution of White user win rates and Black opponent win rates to represent distribution of overall win rates:
 
-   Distribution of draw rates when user is White and opponent is Black: Graph visualizing the loss trends across players of different ratings: Visualization of rating differences between the user and their opponents:
+   ![Sorry the image isn't available. Check the final.ipynb ](images\wrOverall.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images\wrColor.png)
+
+   Distribution of draw rates when user is White and opponent is Black: 
+
+   ![Sorry the image isn't available. Check the final.ipynb ](images\drawRates.png)
+   
+   Graph visualizing the loss trends across players of different ratings: 
+   
+   ![Sorry the image isn't available. Check the final.ipynb ](images\lossVSrating.png)
+   
+   Visualization of rating differences between the user and their opponents:
+
+   ![Sorry the image isn't available. Check the final.ipynb ](images\ratingDiff.png)
 
 5. **Data Preparation**
 
