@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score
 
-data = pd.read_csv('cleaned.csv')
+data = pd.read_csv('final_report/cleaned.csv')
 
 # our features
 X = data.drop(columns=['game_result', 'user_id', 'op_id'])
