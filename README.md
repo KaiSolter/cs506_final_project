@@ -41,6 +41,7 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 4. **Preliminary Data Analysis** 
 
    To begin with, we got a preliminary rating distribution of our users and opponents as shown below (2 graphs):
+   ![Preliminary Distribution](images/precleanRating.png)
 
    This should be matched to follow the same rating distribution of active blitz users on lichess:
 

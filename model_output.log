@@ -1,1 +1,27 @@
-Accuracy with Selected Parameters: 0.5935176925364258
+Traceback (most recent call last):
+  File "/Users/rebeccageisberg/Desktop/cs 506/assignments/FINAL /cs506_final_project/final_report/model.py", line 7, in <module>
+    data = pd.read_csv('cleaned.csv')
+  File "/Users/rebeccageisberg/Desktop/cs 506/assignments/FINAL /cs506_final_project/venv/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/Users/rebeccageisberg/Desktop/cs 506/assignments/FINAL /cs506_final_project/venv/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/Users/rebeccageisberg/Desktop/cs 506/assignments/FINAL /cs506_final_project/venv/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/rebeccageisberg/Desktop/cs 506/assignments/FINAL /cs506_final_project/venv/lib/python3.13/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+                   ~~~~~~~~~~^
+        f,
+        ^^
+    ...<6 lines>...
+        storage_options=self.options.get("storage_options", None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/rebeccageisberg/Desktop/cs 506/assignments/FINAL /cs506_final_project/venv/lib/python3.13/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+        handle,
+    ...<3 lines>...
+        newline="",
+    )
+FileNotFoundError: [Errno 2] No such file or directory: 'cleaned.csv'
