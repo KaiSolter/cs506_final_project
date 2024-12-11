@@ -182,11 +182,11 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 
 9. **Reflection**
 
-   When reflection upon this project, there are several lessons we learned along the way: 
+  When reflection upon this project, there are several lessons we learned along the way: 
 
   1. RATE LIMITING ISSUES
 
-    1.  When we were collecting our data, the main issue we ran into was rate limiting with the Lichess API. When we were trying to get our initial user id list, we were requesting data too fast, which was really halting our progress. However, we ended up changing our code so that when we run into rate limiting issues, we save our progress into a csv, and pick up from where we left off. Even with this system in place, the rate limiting was a significant challenge in terms of timely data collection. It's possible that we should have emailed the creator of the lichess API in hopes that he would be receptive to the idea of sharing data with us. However, we were nervous about being locked out of the API all-together (although we did ensure that we were following the user guidelines). Upon reflection, all things considered we would email first, and go from there. 
+    1.When we were collecting our data, the main issue we ran into was rate limiting with the Lichess API. When we were trying to get our initial user id list, we were requesting data too fast, which was really halting our progress. However, we ended up changing our code so that when we run into rate limiting issues, we save our progress into a csv, and pick up from where we left off. Even with this system in place, the rate limiting was a significant challenge in terms of timely data collection. It's possible that we should have emailed the creator of the lichess API in hopes that he would be receptive to the idea of sharing data with us. However, we were nervous about being locked out of the API all-together (although we did ensure that we were following the user guidelines). Upon reflection, all things considered we would email first, and go from there. 
 
 2. PROGRESS/CHANGES SINCE MIDTERM REPORT
    1. Since the midterm report, several things in our project have changed. For starters, a feature that we used in the midterm called current\_win\_streak, was actually cheating. This feature was cheating because it held the current number of games that the user had won in a row, which inadvertently gives away the answer of who won the game. One of the users would have a nonzero positive value as their win streak, and the other would have a zero.  
