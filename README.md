@@ -61,20 +61,20 @@ By: Tia Zheng, Rebecca Geisberg, Kai Solter
 
    Distribution of White user win rates and Black opponent win rates to represent distribution of overall win rates:
 
-   ![Sorry the image isn't available. Check the final.ipynb ](images\wrOverall.png)
-   ![Sorry the image isn't available. Check the final.ipynb ](images\wrColor.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/wrOverall.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/wrColor.png)
 
    Distribution of draw rates when user is White and opponent is Black: 
 
-   ![Sorry the image isn't available. Check the final.ipynb ](images\drawRates.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/drawRates.png)
    
    Graph visualizing the loss trends across players of different ratings: 
    
-   ![Sorry the image isn't available. Check the final.ipynb ](images\lossVSrating.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/lossVSrating.png)
    
    Visualization of rating differences between the user and their opponents:
 
-   ![Sorry the image isn't available. Check the final.ipynb ](images\ratingDiff.png)
+   ![Sorry the image isn't available. Check the final.ipynb ](images/ratingDiff.png)
 
 5. **Data Preparation**
 
